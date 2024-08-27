@@ -22,6 +22,7 @@ pipeline {
         stage('Building docker image') {
             steps {
                 sh 'docker build -t 654654147135.dkr.ecr.ap-south-1.amazonaws.com/private-repo:${BUILD_NUMBER} .'
+#In above private repo is the name of repository u have created & give the build number #
             }
          }
         stage('ECR-Push') {

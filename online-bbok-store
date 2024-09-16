@@ -1,0 +1,110 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Git checkout') {
+            steps {
+               git 'https://github.com/bhagyakote/Online_Book_Store.git'
+            }
+        }
+     
+        
+        stage('Building the Project') {
+            steps {
+                sh 'mvn install'
+            }
+        }
+        // stage('OWASP-dependency-chcek') {
+        //     steps {
+        //      dependencyCheck additionalArguments: '--format HTML', odcInstallation: 'OWASP Dependency-Check Vulnerabilities'
+             
+        //     }
+        // }
+        
+        stage('Listing the content') {
+            steps {
+                sh 'ls'
+            }
+        }
+      
+        stage ('Sonarqube analysis') {
+          steps {
+               
+          sh " mvn clean verify sonar:sonar \
+          -Dsonar.projectKey=Online-Bookstore \
+          -Dsonar.host.url=http://localhost:9000 \
+          -Dsonar.login=sqp_cdd9da4bba030de7610d37d7bf0de308f86079c5"
+        
+            }
+    
+        }
+        
+         stage('Docker Build') {
+            steps {
+                sh 'docker build -t bhagyakote/petclinic1:${BUILD_NUMBER} .'
+            }
+            
+        }
+         stage('Trivy Scan') {
+            steps {
+                sh 'trivy image -o report1.xml bhagyakote/petclinic1:${BUILD_NUMBER}'
+            }
+            
+        }   
+               
+                
+        stage('Dockerhub Push') {
+            steps {
+                sh 'echo "Karna@281993" | docker login -u bhagyakote --password-stdin'   
+                sh 'docker push bhagyakote/petclinic1:${BUILD_NUMBER}'
+            }
+        }
+        
+
+  stage ('Nexus Push') {
+          steps {
+              script {
+                    pom = readMavenPom file: "pom.xml";
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    artifactPath = filesByGlob[0].path;
+                    artifactExists = fileExists artifactPath;
+                    if(artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                
+                    
+                nexusArtifactUploader(
+                            nexusVersion: 'nexus3',
+                            protocol: 'http',
+                            nexusUrl: 'localhost:8081',
+                            groupId: 'pom.onlinebookstore',
+                            version: 'pom.0.0.1-SNAPSHOT',
+                            repository: 'maven-central-Repository',
+                            credentialsId: 'nexus',
+                            artifacts: [
+                                [artifactId: 'pom.onlinebookstore',
+                                classifier: '',
+                                file: 'pom.xml',
+                                type: 'pom' ]
+                                ]
+                                
+                                )
+                         }   }  
+                    }
+              }
+          
+        stage('Tomcat-deployment') {
+          steps {
+                 
+            deploy adapters: [tomcat9(credentialsId: 'Tomcat_deployer', path: '', url: 'http://localhost:8084/manager/html')], contextPath: null, war: '**/*.war'
+         
+              }
+          }    
+      
+      }
+    
+    }
+
+        
+    
+

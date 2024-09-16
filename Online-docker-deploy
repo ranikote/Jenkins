@@ -1,0 +1,92 @@
+pipeline {
+    agent any
+    tools {
+        maven 'MAVEN'
+    }
+    options {
+  buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '100')
+}    
+    // environment {
+    //     Dockerhublogin = credentials('Dockerhublogin')
+    //     credentials = cred('AWS_login')
+    // }
+
+
+    stages {
+        stage('Checkout the code') {
+            steps {
+                git 'https://github.com/bhagyakote/Online_Book_Store.git'
+            }
+        }
+        
+//         stage('Maven BUild') {
+//             steps {
+//                 sh 'mvn package'
+//     }
+// }
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t bhagyakote/bookstore:${BUILD_NUMBER} .'
+            }
+            
+        }
+         stage('Trivy Scan') {
+            steps {
+                sh 'trivy image -o report1.xml bhagyakote/bookstore:${BUILD_NUMBER}'
+            }
+            
+        }   
+               
+                
+        stage('Dockerhub Push') {
+            steps {
+                sh 'echo "Karna@281993" | docker login -u bhagyakote --password-stdin'   
+                sh 'docker push bhagyakote/bookstore:${BUILD_NUMBER}'
+            }
+        }
+        
+                
+        // stage('ECR push') {
+        //     steps {
+        //         sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 339712957257.dkr.ecr.us-east-1.amazonaws.com'   
+        //         sh 'docker push bhagyakote/bookstore:${BUILD_NUMBER}'
+        //     }
+        // }
+                
+        // stage('Removing docker container') {
+        //     steps {
+               
+        //         sh 'docker rm ${docker ps -aq}'
+        //     }   
+        // }      
+                
+        stage('Dockerhub run') {
+            steps {
+                sh 'docker run -d -p 8085:8080 --name bookstore bhagyakote/bookstore:${BUILD_NUMBER}' 
+                
+            }
+        }
+        
+        
+    }
+        
+        post {
+           always {
+             echo "Job is completed"
+    
+                    }
+            success {
+              echo "It is successfull"
+                  }
+            failure {
+              echo "It has failure"
+              }
+           }
+       }
+    
+    
+    
+    
+    
+    
+    

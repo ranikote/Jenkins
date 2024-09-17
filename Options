@@ -1,0 +1,19 @@
+Syntax-Generator
+-Declarative director generator
+pipeline {
+    
+    agent any
+    
+        
+    options {
+  buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '13', numToKeepStr: '16')
+    }
+       
+     stages {
+         stage ('Build-stage'){
+             steps {
+                 echo "This is build stage"
+             }
+         }
+     }
+}

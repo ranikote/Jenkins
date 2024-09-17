@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+    
+    environment {
+  name = "karan"
+}
+
+
+    stages {
+        stage('Env-var') {
+            steps {
+                echo "My name is ${env.name}"
+            }
+        }
+    }
+}

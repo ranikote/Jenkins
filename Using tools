@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    
+     tools {
+        maven 'maven'
+        git 'Default'
+        jdk 'java'
+    }
+    
+   stages {
+       stage('git checkout') {
+           steps {
+               git 'https://github.com/ranikote/addressbook.git'
+               
+           }
+       }
+       
+       stage ('Building the code') {
+            steps {
+               
+                sh 'mvn clean install'
+         }
+      }
+   
+    }
+
+}
+
+

@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Env-var') {
             steps {
-                echo "My name is ${env.name}"
+                echo "My name is ${env.name}"  #DO not use ' ' for declaring variables'
             }
         }
     }

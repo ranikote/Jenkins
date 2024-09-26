@@ -1,1 +1,20 @@
+1)Unabe to deploy jara/war in tomcat through synatx generator:-
+sol= jenkins doenst supoort tomcat version above 9
 
+2)UNbale to copy jar/war manually in tomcat & jboss permission denied
+sol:-
+sudo chown -R wildfly:wildfly /opt/wildfly/standalone/deployments
+sudo chmod -R 755 /opt/wildfly/standalone/deployments
+makinging use of -r while copying the data
+
+For passwordless authenticataion:-
+command used in jenkins:-
+sh 'sudo cp -r /var/lib/jenkins/workspace/Online-book-store/target  /opt/wildfly/standalone/deployments'
+              
+vi sudo
+root    ALL=(ALL:ALL) ALL
+nexus   ALL=(ALL) NOPASSWD: ALL
+ansible ALL=(ALL) NOPASSWD: ALL
+wildfly ALL=(ALL) NOPASSWD: /bin/cp -R target/*.war /opt/wildfly/standalone/deployments
+jenkins ALL=(ALL) NOPASSWD: /bin/cp -r /var/lib/jenkins/workspace/Java-maven-addressbook/target /opt/wildfly/standalone/deployments
+jenkins ALL=(ALL) NOPASSWD: /bin/cp -r /var/lib/jenkins/workspace/Online-book-store/target /opt/wildfly/standalone/deployments

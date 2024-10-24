@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+    
+     options {
+       timestamps()   #Add () manually#
+        }
+
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        
+        stage("Hello again") {
+            steps {
+                echo "Hi again"
+            }
+        }
+    }
+}

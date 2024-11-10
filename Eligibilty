@@ -1,0 +1,6 @@
+age=50
+if [ $age -ge 18 ]; then
+    echo "You are eligible"
+else 
+   echo "You are not eligible"
+   fi

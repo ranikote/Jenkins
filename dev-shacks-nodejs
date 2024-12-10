@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Git chcekout') {
+            steps {
+               git branch: 'main', url: 'https://github.com/jaiswaladi246/demo_nodejs_webpage.git'
+            }
+        }
+         stage('install dependencies') {
+            steps {
+               sh 'npm install'
+            }
+        }
+        
+        // stage("OWASP Dependency Check"){
+        //     steps{
+        //         dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
+        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+        //     }
+        // }
+         stage('Docker Build') {
+            steps {
+                sh 'docker build -t bhagyakote/nodejs:${BUILD_NUMBER} .'
+            }
+            
+           }
+       stage('Dockerhub Push') {
+            steps {
+                sh 'echo "Karna@281993" | docker login -u bhagyakote --password-stdin'   
+                sh 'docker push bhagyakote/nodejs:${BUILD_NUMBER}'
+            }
+        }
+          stage('Docker deploy') {
+            steps {
+                sh "docker run -d --name demo-node.js -p 8081:8081 bhagyakote/nodejs:${BUILD_NUMBER}"
+            }
+        }
+        
+        }
+     }
+     
